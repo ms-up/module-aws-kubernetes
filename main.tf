@@ -82,7 +82,10 @@ resource "aws_iam_role" "ms-node" {
     {
       "Effect": "Allow",
       "Principal": {
-        "Service": "eks.amazonaws.com"
+        "Service": [
+          "eks.amazonaws.com",
+          "ec2.amazonaws.com"
+        ]
       },
       "Action": "sts:AssumeRole"
     }
@@ -107,6 +110,11 @@ resource "aws_iam_role_policy_attachment" "ms-node-ContainerRegistryReadOnly" {
   role       = aws_iam_role.ms-node.name
 }
 
+resource "aws_iam_role_policy_attachment" "ms-cluster-EKS-Access" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role       = aws_iam_role.ms-cluster.name
+}
+
 resource "aws_eks_node_group" "ms-node-group" {
   cluster_name    = aws_eks_cluster.ms-up-running.name
   node_group_name = var.ms_namespace
@@ -125,7 +133,8 @@ resource "aws_eks_node_group" "ms-node-group" {
   depends_on = [
     aws_iam_role_policy_attachment.ms-node-AmazonEKS_CNI_POLICY,
     aws_iam_role_policy_attachment.ms-node-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.ms-node-ContainerRegistryReadOnly
+    aws_iam_role_policy_attachment.ms-node-ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.ms-cluster-EKS-Access
   ]
 }
 
@@ -150,7 +159,7 @@ users:
   - name: ${aws_eks_cluster.ms-up-running.arn}
     user:
       exec:
-        apiVersion: client.authentication.k8s.io/v1alpha1
+        apiVersion: client.authentication.k8s.io/v1beta1
         command: aws-iam-authenticator
         args:
           - "token"
