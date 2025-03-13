@@ -98,7 +98,7 @@ resource "aws_iam_role_policy_attachment" "ms-node-AmazonEKSWorkerNodePolicy" {
 }
 
 resource "aws_iam_role_policy_attachment" "ms-node-AmazonEKS_CNI_POLICY" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_POLICY"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.ms-node.name
 }
 
